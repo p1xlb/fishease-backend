@@ -10,7 +10,9 @@ const authRoutes = [
             validate: {
                 payload: Joi.object({
                     email: Joi.string().email().required(),
-                    password: Joi.string().min(6).required()
+                    password: Joi.string().min(6).required(),
+                    name: Joi.string().required().min(2).max(100),
+                    phone: Joi.string().pattern(/^\+?[\d\s-]+$/).required()
                 })
             },
             handler: authHandler.register

@@ -5,29 +5,49 @@ const { JWT_SECRET, SALT_ROUNDS } = require('../config/constants');
 
 const authHandler = {
     register: async (request, h) => {
-        const { email, password } = request.payload;
+        const { email, password, name, phone } = request.payload;
 
         try {
+            // Check if user already exists
             const [existingUsers] = await pool.execute(
                 'SELECT * FROM user WHERE email = ?',
                 [email]
             );
 
             if (existingUsers.length > 0) {
-                return h.response({ message: 'Email already registered' }).code(400);
+                return h.response({ 
+                    status: 'error',
+                    message: 'Email already registered' 
+                }).code(400);
             }
 
+            // Hash password
             const password_hashed = await bcrypt.hash(password, SALT_ROUNDS);
 
-            await pool.execute(
-                'INSERT INTO user (email, password_hashed) VALUES (?, ?)',
-                [email, password_hashed]
+            // Insert new user with current timestamp
+            const [result] = await pool.execute(
+                `INSERT INTO user (email, password_hashed, name, phone, created_at) 
+                 VALUES (?, ?, ?, ?, NOW())`,
+                [email, password_hashed, name, phone]
             );
 
-            return { message: 'User registered successfully' };
+            return {
+                status: 'success',
+                message: 'User created successfully',
+                data: {
+                    id: result.insertId,
+                    email,
+                    name,
+                    phone,
+                    created_at: new Date()
+                }
+            };
         } catch (error) {
-            console.error(error);
-            return h.response({ message: 'Internal server error' }).code(500);
+            console.error('Error creating user:', error);
+            return h.response({ 
+                status: 'error',
+                message: 'Internal server error' 
+            }).code(500);
         }
     },
 
