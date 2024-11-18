@@ -1,5 +1,6 @@
 const Hapi = require('@hapi/hapi');
 const authRoutes = require('./routes/authRoutes');
+const scanRoutes = require('./routes/scanRoutes');
 const jwtAuthScheme = require('./middleware/auth');
 
 const init = async () => {
@@ -14,7 +15,7 @@ const init = async () => {
     server.auth.default('jwt');
 
     // Register routes
-    server.route(authRoutes);
+    server.route([...authRoutes, ...scanRoutes]);
 
     await server.start();
     console.log('Server running on %s', server.info.uri);
