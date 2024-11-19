@@ -7,7 +7,7 @@ const scanHistoryHandler = {
         try {
             // Get user ID from user table with the correct column name
             const [users] = await pool.execute(
-                'SELECT user_id FROM user WHERE email = ?',  // Changed 'id' to 'user_id'
+                'SELECT user_id FROM user WHERE email = ?',
                 [email]
             );
 
@@ -18,7 +18,7 @@ const scanHistoryHandler = {
                 }).code(404);
             }
 
-            const userId = users[0].user_id;  // Changed from id to user_id
+            const userId = users[0].user_id;
 
             // Get scan history using user_id
             const [scans] = await pool.execute(
@@ -64,7 +64,7 @@ const scanHistoryHandler = {
         try {
             // Get user ID from user table with the correct column name
             const [users] = await pool.execute(
-                'SELECT user_id FROM user WHERE email = ?',  // Changed 'id' to 'user_id'
+                'SELECT user_id FROM user WHERE email = ?', 
                 [email]
             );
 
@@ -75,7 +75,7 @@ const scanHistoryHandler = {
                 }).code(404);
             }
 
-            const userId = users[0].user_id;  // Changed from id to user_id
+            const userId = users[0].user_id;
 
             // Get scan details
             const [scans] = await pool.execute(

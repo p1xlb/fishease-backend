@@ -41,6 +41,33 @@ const authRoutes = [
         }
     },
     {
+        method: 'POST',
+        path: '/requestReset',
+        options: {
+            auth: false,
+            handler: authHandler.requestReset,
+            validate: {
+                payload: Joi.object({
+                    email: Joi.string().email().required()
+                })
+            }
+        }
+    },
+    {
+        method: 'POST',
+        path: '/resetPassword',
+        options: {
+            auth: false,
+            validate: {
+                payload: Joi.object({
+                    token: Joi.string().required(),
+                    newPassword: Joi.string().min(6).required()
+                })
+            },
+            handler: authHandler.resetPassword
+        }
+    },
+    {
         method: 'GET',
         path: '/protected',
         options: {

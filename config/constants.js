@@ -1,4 +1,8 @@
+const dotenv = require('dotenv');
+
+dotenv.config();
+
 module.exports = {
-    JWT_SECRET: 'Qq8X4HsWWtqD95b8c',
+    JWT_SECRET: process.env.JWT_SECRET,
     SALT_ROUNDS: 10
 };
