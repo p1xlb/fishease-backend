@@ -30,7 +30,7 @@ const authHandler = {
                  VALUES (?, ?, ?, ?, NOW())`,
                 [email, password_hashed, name, phone]
             );
-
+            
             return {
                 status: 'success',
                 message: 'User created successfully',
@@ -83,7 +83,90 @@ const authHandler = {
 
     protected: async (request, h) => {
         return { message: 'This is a protected route', user: request.auth.credentials };
-    }
+    },
+
+    updatemail: async (request, h) => {
+        const { newEmail, password } = request.payload;
+        const currentEmail = request.auth.credentials.email;  // From JWT token
+
+        try {
+            // Don't allow changing to same email
+            if (currentEmail === newEmail) {
+                return h.response({
+                    status: 'error',
+                    message: 'New email must be different from current email'
+                }).code(400);
+            }
+
+            // Check if new email already exists
+            const [existingUsers] = await pool.execute(
+                'SELECT user_id FROM user WHERE email = ?',
+                [newEmail]
+            );
+
+            if (existingUsers.length > 0) {
+                return h.response({
+                    status: 'error',
+                    message: 'Email already in use'
+                }).code(409);
+            }
+
+            // Verify user's password before allowing change
+            const [user] = await pool.execute(
+                'SELECT password_hashed FROM user WHERE email = ?',
+                [currentEmail]
+            );
+
+            if (!user[0]) {
+                return h.response({
+                    status: 'error',
+                    message: 'User not found'
+                }).code(404);
+            }
+
+            const isValid = await bcrypt.compare(password, user[0].password_hashed);
+
+            if (!isValid) {
+                return h.response({
+                    status: 'error',
+                    message: 'Invalid password'
+                }).code(401);
+            }
+
+            // Update email
+            await pool.execute(
+                `UPDATE user 
+                 SET email = ?, 
+                     updated_at = NOW() 
+                 WHERE email = ?`,
+                [newEmail, currentEmail]
+            );
+
+            // Generate new token with updated email
+            const token = jwt.sign(
+                { email: newEmail },
+                JWT_SECRET,
+                { expiresIn: '1h' }
+            );
+
+            return {
+                status: 'success',
+                message: 'Email updated successfully',
+                data: {
+                    email: newEmail,
+                    token: token
+                }
+            };
+
+        } catch (error) {
+            console.error('Error changing email:', error);
+            return h.response({
+                status: 'error',
+                message: 'Internal server error'
+            }).code(500);
+        }
+        }
+
 };
 
 module.exports = authHandler;

@@ -33,6 +33,14 @@ const authRoutes = [
         }
     },
     {
+        method: 'POST',
+        path: '/updatemail',
+        options: {
+            auth: 'jwt',
+            handler: authHandler.updatemail
+        }
+    },
+    {
         method: 'GET',
         path: '/protected',
         options: {
