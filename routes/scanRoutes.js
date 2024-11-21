@@ -20,6 +20,14 @@ const scanRoutes = [
             },
             handler: scanHistoryHandler.getScanDetails
         }
+    },
+    {
+        method: 'DELETE',
+        path: '/scan-history/{id_entry}',
+        options: {
+            auth: 'jwt',
+            handler: scanHistoryHandler.deleteScanEntry
+        }
     }
 ];
 

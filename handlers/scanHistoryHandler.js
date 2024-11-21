@@ -117,7 +117,90 @@ const scanHistoryHandler = {
                 message: 'Failed to retrieve scan details'
             }).code(500);
         }
+    },
+
+    deleteScanEntry: async (request, h) => {
+        const { id_entry } = request.params;
+        const { email } = request.auth.credentials;
+
+        let connection;
+        try {
+            // Start a transaction to ensure data integrity
+            connection = await pool.getConnection();
+            await connection.beginTransaction();
+
+            // First, verify the user and get their user_id
+            const [users] = await connection.execute(
+                'SELECT user_id FROM user WHERE email = ?', 
+                [email]
+            );
+
+            if (users.length === 0) {
+                await connection.rollback();
+                return h.response({
+                    status: 'error',
+                    message: 'User not found'
+                }).code(404);
+            }
+
+            const userId = users[0].user_id;
+
+            // Check if the scan entry belongs to the user
+            const [scanCheck] = await connection.execute(
+                'SELECT id_entry FROM entry_history WHERE id_entry = ? AND user_id = ?',
+                [id_entry, userId]
+            );
+
+            if (scanCheck.length === 0) {
+                await connection.rollback();
+                return h.response({
+                    status: 'error',
+                    message: 'Scan entry not found or not authorized'
+                }).code(404);
+            }
+
+            // Delete the scan entry
+            const [result] = await connection.execute(
+                'DELETE FROM entry_history WHERE id_entry = ? AND user_id = ?',
+                [id_entry, userId]
+            );
+
+            // Commit the transaction
+            await connection.commit();
+
+            // Check if any rows were actually deleted
+            if (result.affectedRows === 0) {
+                return h.response({
+                    status: 'error',
+                    message: 'No scan entry was deleted'
+                }).code(404);
+            }
+
+            return h.response({
+                status: 'success',
+                message: 'Scan entry deleted successfully',
+                deleted_entry_id: id_entry
+            }).code(200);
+
+        } catch (error) {
+            // Rollback the transaction in case of error
+            if (connection) {
+                await connection.rollback();
+            }
+
+            console.error('Error deleting scan entry:', error);
+            return h.response({
+                status: 'error',
+                message: 'Failed to delete scan entry'
+            }).code(500);
+        } finally {
+            // Release the connection back to the pool
+            if (connection) {
+                connection.release();
+            }
+        }
     }
+
 };
 
 module.exports = scanHistoryHandler;

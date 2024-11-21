@@ -90,7 +90,7 @@ const authHandler = {
         return { message: 'This is a protected route', user: request.auth.credentials };
     },
 
-    updatemail: async (request, h) => {
+    update_mail: async (request, h) => {
         const { newEmail, password } = request.payload;
         const currentEmail = request.auth.credentials.email;  // From JWT token
 
