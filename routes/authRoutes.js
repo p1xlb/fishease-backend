@@ -22,6 +22,7 @@ const authRoutes = [
         method: 'POST',
         path: '/login',
         options: {
+            cors: true,
             auth: false,
             validate: {
                 payload: Joi.object({
@@ -32,6 +33,16 @@ const authRoutes = [
             handler: authHandler.login
         }
     },
+
+    {
+        method: 'GET',
+        path: '/userInfo',
+        options: {
+            auth: 'jwt',
+            handler: authHandler.userInfo
+        }
+    },
+
     {
         method: 'POST',
         path: '/update-mail',

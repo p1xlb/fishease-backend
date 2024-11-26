@@ -9,7 +9,14 @@ dotenv.config();
 const init = async () => {
     const server = Hapi.server({
         port: process.env.PORT || 3000,
-        host: 'localhost'
+        host: 'localhost',
+        routes: {
+            cors: {
+                origin: ['*'],
+                credentials: true,
+                headers: ['Accept', 'Authorization', 'Content-Type', 'If-None-Match']
+            }
+        }
     });
 
     // Register authentication scheme and strategy

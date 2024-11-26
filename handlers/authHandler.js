@@ -79,9 +79,39 @@ const authHandler = {
 
             const token = jwt.sign({ email: user.email }, JWT_SECRET, { expiresIn: '1h' });
 
-            return { token };
+            return h.response({ 
+                token, 
+                message: 'Login successful',
+            }).code(200);
+
         } catch (error) {
             console.error(error);
+            return h.response({ message: 'Internal server error' }).code(500);
+        }
+    },
+
+    userInfo: async (request, h) => {
+        const { email } = request.auth.credentials;
+
+        try {
+            const [rows] = await pool.execute(
+                'SELECT user_id, email, name, phone, created_at FROM user WHERE email = ?',
+                [email]
+            );
+
+            const user = rows[0];
+
+            if (!user) {
+                return h.response({ message: 'User not found' }).code(404);
+            }
+
+            return h.response({
+                status: 'success',
+                data: user
+            }).code(200);
+
+        } catch (error) {
+            console.error('Error fetching user:', error);
             return h.response({ message: 'Internal server error' }).code(500);
         }
     },

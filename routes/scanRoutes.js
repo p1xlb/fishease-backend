@@ -1,5 +1,6 @@
 const Joi = require('joi');
 const scanHistoryHandler = require('../handlers/scanHistoryHandler');
+const scanHandler = require('../handlers/scanHandler');
 
 const scanRoutes = [
     {
@@ -27,6 +28,21 @@ const scanRoutes = [
         options: {
             auth: 'jwt',
             handler: scanHistoryHandler.deleteScanEntry
+        }
+    },
+    {
+        method: 'POST',
+        path: '/uploadEntry',
+        options: {
+            auth : 'jwt',
+            handler: scanHandler.uploadEntry,
+            validate: {
+                payload: Joi.object({
+                    image_url: Joi.string().uri(),
+                    scheme: ['http', 'https']
+
+                }).required()
+            }
         }
     }
 ];
