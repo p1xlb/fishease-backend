@@ -32,6 +32,14 @@ const scanRoutes = [
     },
     {
         method: 'POST',
+        path: '/disease-info',
+        options: {
+            auth: false,
+            handler: scanHistoryHandler.getDiseaseDetails
+        }
+    },
+    {
+        method: 'POST',
         path: '/uploadEntry',
         options: {
             auth : 'jwt',

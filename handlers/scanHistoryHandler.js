@@ -199,7 +199,45 @@ const scanHistoryHandler = {
                 connection.release();
             }
         }
+    },
+
+    getDiseaseDetails: async (request, h) => {
+        const { disease_name } = request.payload;  // Access the body of the request
+    
+        if (!disease_name) {
+            return h.response({
+                status: 'error',
+                message: 'Disease name is required'
+            }).code(400);
+        }
+    
+        try {
+            // Get disease details
+            const [diseases] = await pool.execute(
+                'SELECT * FROM diseases WHERE disease_name = ?',
+                [disease_name]
+            );
+    
+            if (diseases.length === 0) {
+                return h.response({
+                    status: 'error',
+                    message: 'Disease not found'
+                }).code(404);
+            }
+    
+            return {
+                status: 'success',
+                data: diseases[0]
+            };
+        } catch (error) {
+            console.error('Error fetching disease details:', error);
+            return h.response({
+                status: 'error',
+                message: 'Failed to retrieve disease details'
+            }).code(500);
+        }
     }
+    
 
 };
 
