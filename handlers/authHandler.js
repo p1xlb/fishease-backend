@@ -202,104 +202,104 @@ const authHandler = {
         }
         },
 
-        requestReset: async (request, h) => {
-            const { email } = request.payload;
-    
-            try {
-                // Find user by email
-                const [users] = await pool.execute(
-                    'SELECT user_id FROM user WHERE email = ?', 
-                    [email]
-                );
-    
-                if (users.length === 0) {
-                    return h.response({ 
-                        status: 'error', 
-                        message: 'Email not found' 
-                    }).code(404);
-                }
-    
-                const userId = users[0].user_id;
-    
-                // Generate reset token
-                const resetToken = crypto.randomBytes(32).toString('hex');
-                const expiresAt = new Date(Date.now() + 3600000); // 1 hour from now
-    
-                // Store reset token in separate password_reset_tokens table
-                await pool.execute(
-                    `INSERT INTO password_reset_tokens 
-                     (user_id, token, expires_at) 
-                     VALUES (?, ?, ?)`,
-                    [userId, resetToken, expiresAt]
-                );
-    
-                // Send reset email
-                const resetLink = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}`;
-                await sendResetEmail(email, resetLink);
-    
-                return { 
-                    status: 'success', 
-                    message: 'Password reset link sent' 
-                };
-            } catch (error) {
-                console.error('Password reset request error:', error);
+    requestReset: async (request, h) => {
+        const { email } = request.payload;
+
+        try {
+            // Find user by email
+            const [users] = await pool.execute(
+                'SELECT user_id FROM user WHERE email = ?', 
+                [email]
+            );
+
+            if (users.length === 0) {
                 return h.response({ 
                     status: 'error', 
-                    message: 'Internal server error' 
-                }).code(500);
+                    message: 'Email not found' 
+                }).code(404);
             }
-        },
-    
-        resetPassword: async (request, h) => {
-            const { token, newPassword } = request.payload;
-    
-            try {
-                // Find valid reset token
-                const [tokens] = await pool.execute(
-                    `SELECT user_id FROM password_reset_tokens 
-                     WHERE token = ? AND expires_at > NOW()`, 
-                    [token]
-                );
-    
-                if (tokens.length === 0) {
-                    return h.response({ 
-                        status: 'error', 
-                        message: 'Invalid or expired reset token' 
-                    }).code(400);
-                }
-    
-                const userId = tokens[0].user_id;
-    
-                // Hash new password
-                const password_hashed = await bcrypt.hash(newPassword, SALT_ROUNDS);
-    
-                // Update password
-                await pool.execute(
-                    `UPDATE user 
-                     SET password_hashed = ?, 
-                         updated_at = NOW() 
-                     WHERE user_id = ?`,
-                    [password_hashed, userId]
-                );
-    
-                // Delete used token
-                await pool.execute(
-                    'DELETE FROM password_reset_tokens WHERE token = ?',
-                    [token]
-                );
-    
-                return { 
-                    status: 'success', 
-                    message: 'Password reset successfully' 
-                };
-            } catch (error) {
-                console.error('Password reset error:', error);
+
+            const userId = users[0].user_id;
+
+            // Generate reset token
+            const resetToken = crypto.randomBytes(32).toString('hex');
+            const expiresAt = new Date(Date.now() + 3600000); // 1 hour from now
+
+            // Store reset token in separate password_reset_tokens table
+            await pool.execute(
+                `INSERT INTO password_reset_tokens 
+                 (user_id, token, expires_at) 
+                 VALUES (?, ?, ?)`,
+                [userId, resetToken, expiresAt]
+            );
+
+            // Send reset email
+            const resetLink = `${process.env.FRONTEND_URL}/admin-login/newPassword.html?token=${resetToken}`; // Change in prod
+            await sendResetEmail(email, resetLink);
+
+            return { 
+                status: 'success', 
+                message: 'Password reset link sent' 
+            };
+        } catch (error) {
+            console.error('Password reset request error:', error);
+            return h.response({ 
+                status: 'error', 
+                message: 'Internal server error' 
+            }).code(500);
+        }
+    },
+
+    resetPassword: async (request, h) => {
+        const { token, newPassword } = request.payload;
+
+        try {
+            // Find valid reset token
+            const [tokens] = await pool.execute(
+                `SELECT user_id FROM password_reset_tokens 
+                 WHERE token = ? AND expires_at > NOW()`, 
+                [token]
+            );
+
+            if (tokens.length === 0) {
                 return h.response({ 
                     status: 'error', 
-                    message: 'Internal server error' 
-                }).code(500);
+                    message: 'Invalid or expired reset token' 
+                }).code(400);
             }
-        } 
+
+            const userId = tokens[0].user_id;
+
+            // Hash new password
+            const password_hashed = await bcrypt.hash(newPassword, SALT_ROUNDS);
+
+            // Update password
+            await pool.execute(
+                `UPDATE user 
+                 SET password_hashed = ?, 
+                     updated_at = NOW() 
+                 WHERE user_id = ?`,
+                [password_hashed, userId]
+            );
+
+            // Delete used token
+            await pool.execute(
+                'DELETE FROM password_reset_tokens WHERE token = ?',
+                [token]
+            );
+
+            return { 
+                status: 'success', 
+                message: 'Password reset successfully' 
+            };
+        } catch (error) {
+            console.error('Password reset error:', error);
+            return h.response({ 
+                status: 'error', 
+                message: 'Internal server error' 
+            }).code(500);
+        }
+    } 
 };
 
 async function sendResetEmail(email, resetLink) {

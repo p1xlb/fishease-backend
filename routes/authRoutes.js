@@ -75,6 +75,12 @@ const authRoutes = [
                     newPassword: Joi.string().min(6).required()
                 })
             },
+            // plugins: {
+            //     rateLimiter: {
+            //         max: 5,  // 5 attempts
+            //         duration: 15 * 60 * 1000  // per 15 minutes
+            //     }
+            // },    
             handler: authHandler.resetPassword
         }
     },
