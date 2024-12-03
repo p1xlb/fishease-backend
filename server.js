@@ -14,7 +14,7 @@ dotenv.config();
 const init = async () => {
     const server = Hapi.server({
         port: process.env.PORT || 3000,
-        host: 'localhost',
+        host: process.env.HOST || 'localhost',
         routes: {
             cors: {
                 origin: ['*'],
@@ -33,7 +33,7 @@ const init = async () => {
       // Swagger configuration
     const swaggerOptions = {
       info: {
-        title: 'API Documentation',
+        title: 'Fish Disease Prediction API Documentation',
         version: '1.0.0'
       },
       securityDefinitions: {

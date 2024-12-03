@@ -20,7 +20,7 @@ const bucketName = process.env.GOOGLE_CLOUD_BUCKET_NAME;
 const scanHandler = {
     async getClasses(request, h) {
         try {
-          const response = await axios.get('http://0.0.0.0:3500/classes');
+          const response = await axios.get(`${process.env.ML_API_URL}/classes`);
           return h.response(response.data).code(200);
         } catch (error) {
           console.error('Error fetching disease classes:', error);
@@ -67,7 +67,7 @@ const scanHandler = {
       const userId = userRows[0].user_id;
 
       // Generate unique entry ID
-      const entryId = `scan${Math.floor(Math.random() * 1000).toString().padStart(3, '0')}`;
+      const entryId = `scan${Math.floor(Math.random() * 1000).toString().padStart(5, '0')}`;
 
       // Prepare file metadata
       const originalFilename = file.filename;
@@ -98,7 +98,7 @@ const scanHandler = {
       // Prediction API call with raw axios configuration
       const predictionResponse = await axios({
         method: 'post',
-        url: 'http://0.0.0.0:3500/predict',
+        url: `${process.env.ML_API_URL}/predict`,
         data: formData,
         headers: {
           ...formData.getHeaders()
@@ -136,20 +136,32 @@ const scanHandler = {
       }).code(200);
 
     } catch (error) {
-      // Rollback transaction in case of error
-      await transaction.rollback();
-      
-      console.error('Comprehensive Error:', {
-        message: error.message,
-        stack: error.stack,
-        responseData: error.response?.data,
-        responseStatus: error.response?.status
-      });
-      return h.response({ 
-        message: 'Prediction processing failed', 
+      // More comprehensive error logging and handling
+      if (error.response) {
+        // The request was made and the server responded with a status code
+        console.error('Prediction API Error:', {
+            status: error.response.status,
+            data: error.response.data,
+            headers: error.response.headers
+        });
+    } else if (error.request) {
+        // The request was made but no response was received
+        console.error('No response received:', error.request);
+    } else {
+        // Something happened in setting up the request
+        console.error('Request Setup Error:', error.message);
+    }
+  
+    // Rollback transaction
+    await transaction.rollback();
+  
+    // More informative error response
+    return h.response({
+        message: 'Prediction processing failed',
         error: error.message,
-        details: error.response?.data
-      }).code(500);
+        details: error.response?.data || 'Unknown error occurred',
+        statusCode: error.response?.status || 500
+    }).code(error.response?.status || 500);
     } finally {
       // Release the connection
       transaction.release();

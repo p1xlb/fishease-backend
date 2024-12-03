@@ -1,4 +1,3 @@
-const { parse } = require("dotenv"); //?
 const scanHandler = require("../handlers/scanHandler");
 const { options } = require("joi");
 const { description } = require("@hapi/joi/lib/base");
