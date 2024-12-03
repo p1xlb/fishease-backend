@@ -1,58 +1,33 @@
-const Joi = require('joi');
-const scanHistoryHandler = require('../handlers/scanHistoryHandler');
-const scanHandler = require('../handlers/scanHandler');
+const { parse } = require("dotenv"); //?
+const scanHandler = require("../handlers/scanHandler");
+const { options } = require("joi");
+const { description } = require("@hapi/joi/lib/base");
 
 const scanRoutes = [
     {
         method: 'GET',
-        path: '/scan-history',
+        path: '/service/classes',
+        handler: scanHandler.getClasses,
         options: {
-            handler: scanHistoryHandler.getUserScanHistory
+            description: 'Get disease classes from model API',
+            tags: ['api', 'classes']
         }
-    },
-    {
-        method: 'GET',
-        path: '/scan-history/{id_entry}',
-        options: {
-            validate: {
-                params: Joi.object({
-                    id_entry: Joi.string().required()
-                })
-            },
-            handler: scanHistoryHandler.getScanDetails
-        }
-    },
-    {
-        method: 'DELETE',
-        path: '/scan-history/{id_entry}',
-        options: {
-            auth: 'jwt',
-            handler: scanHistoryHandler.deleteScanEntry
-        }
-    },
-    {
+      },
+      {
         method: 'POST',
-        path: '/disease-info',
+        path: '/service/predict',
         options: {
-            auth: false,
-            handler: scanHistoryHandler.getDiseaseDetails
-        }
-    },
-    {
-        method: 'POST',
-        path: '/uploadEntry',
-        options: {
-            auth : 'jwt',
-            handler: scanHandler.uploadEntry,
-            validate: {
-                payload: Joi.object({
-                    image_url: Joi.string().uri(),
-                    scheme: ['http', 'https']
-
-                }).required()
+          description: 'Predict disease from uploaded image',
+          tags: ['api', 'predict'],
+          auth: 'jwt',
+            payload: {
+              output: 'file',
+              allow: 'multipart/form-data',
+              parse: true
             }
-        }
-    }
-];
+        },
+        handler: scanHandler.predictDisease
+      }
+]
 
 module.exports = scanRoutes;

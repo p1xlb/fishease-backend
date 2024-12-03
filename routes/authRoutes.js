@@ -1,11 +1,14 @@
 const Joi = require('joi');
 const authHandler = require('../handlers/authHandler');
+const { description } = require('@hapi/joi/lib/base');
 
 const authRoutes = [
     {
         method: 'POST',
         path: '/register',
         options: {
+            description: 'Register a new user',
+            tags: ['api', 'register'],
             auth: false,
             validate: {
                 payload: Joi.object({
@@ -22,6 +25,8 @@ const authRoutes = [
         method: 'POST',
         path: '/login',
         options: {
+            description: 'Login a user',
+            tags: ['api', 'login'],
             cors: true,
             auth: false,
             validate: {
@@ -38,15 +43,18 @@ const authRoutes = [
         method: 'GET',
         path: '/userInfo',
         options: {
+            description: 'Get user info',
+            tags: ['api', 'userInfo'],
             auth: 'jwt',
             handler: authHandler.userInfo
         }
     },
-
     {
         method: 'POST',
         path: '/update-mail',
         options: {
+            description: 'Update user email',
+            tags: ['api', 'update-mail'],
             auth: 'jwt',
             handler: authHandler.update_mail
         }
@@ -55,6 +63,8 @@ const authRoutes = [
         method: 'POST',
         path: '/requestReset',
         options: {
+            description: 'Request password reset',
+            tags: ['api', 'requestReset'],
             auth: false,
             handler: authHandler.requestReset,
             validate: {
@@ -68,6 +78,8 @@ const authRoutes = [
         method: 'POST',
         path: '/resetPassword',
         options: {
+            description: 'Reset password with token',
+            tags: ['api', 'resetPassword'],
             auth: false,
             validate: {
                 payload: Joi.object({

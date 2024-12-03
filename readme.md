@@ -7,3 +7,5 @@
 - Pulling Scan History Data per user basis with token bearer
 - Pulling Scan History per entry basis
 - Deleting a Scan history
+- Uploading Image to Google Cloud Storage Bucket
+- Calling the model prediction API for image predictions
