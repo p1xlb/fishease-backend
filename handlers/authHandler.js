@@ -234,7 +234,7 @@ const authHandler = {
             );
 
             // Send reset email
-            const resetLink = `${process.env.FRONTEND_URL}/admin-login/newPassword.html?token=${resetToken}`; // Change in prod
+            const resetLink = `${process.env.FRONTEND_URL}/service/newPassword.html?token=${resetToken}`;
             await sendResetEmail(email, resetLink);
 
             return { 

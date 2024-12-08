@@ -37,11 +37,14 @@ const init = async () => {
         version: '1.0.0'
       },
       securityDefinitions: {
-        jwt: {
+        Bearer: {
           type: 'apiKey',
-          name: 'Authorization',
-          in: 'header'
+          scheme: 'Bearer',
+          bearerFormat: 'JWT',
         }
+      },
+      security:{
+        Bearer: []
       }
     };
 
