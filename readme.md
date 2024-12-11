@@ -55,3 +55,238 @@ ML_API_URL=
 ```
 npm run start
 ```
+
+## Routes
+Swagger documentations can be found in /documentation
+- POST /login<br/>
+Logs in a user and gets a token
+```
+// Body Request
+{
+  "email": "string",
+  "password": "string"
+}
+
+// Body Response
+{
+    "token": "token_here"
+    "message": "Login successful"
+}
+```
+
+- POST /register<br/>
+Registers a new user
+```
+// Body Request
+{
+  "email": "string",
+  "password": "string",
+  "name": "string",
+  "phone": "string"
+}
+
+// Body Response
+{
+    "status":"success",
+    "message":"User created successfully",
+    "data":{
+        "id":int,
+        "email":"string",
+        "name":"string",
+        "phone":"string",
+        "created_at":"current_timestamp"
+    }
+}
+```
+
+- POST /requestReset<br/>
+Request a password reset
+```
+// Body Request
+{
+    "email": "string"
+}
+
+// Body Response
+{ 
+    "status": 'success', 
+    "message": 'Password reset link sent' 
+}
+```
+
+- POST /resetPassword<br/>
+Reset password with token authentication
+```
+// Body Request
+{
+    "token": "string"
+    "newPassword" : "string"
+}
+
+// Body Response
+{ 
+    "status": 'success', 
+    "message": 'Password reset successfully' 
+}
+```
+
+- POST /update-mail<br/>
+Update user's email
+```
+// Body Request
+{
+    "newEmail": "string"
+    "password": "string"
+}
+
+// Body Response
+{ 
+    "status": 'success', 
+    "message": 'Password reset link sent' 
+}
+```
+
+- GET /userInfo<br/>
+Get logged in user info
+```
+// Headers
+{
+    "Authorization: Bearer {token}"
+}
+
+// Body Response
+{ 
+    "status": 'success', 
+    "data":{
+        "id":int,
+        "email":"string",
+        "name":"string",
+        "phone":"string",
+        "created_at":"current_timestamp"
+    }
+}
+```
+
+- POST /disease-info<br/>
+Get disease details from database
+```
+// Headers
+{
+    "Authorization: Bearer {token}"
+}
+
+// Body Request
+{
+    "disease_name": "string"
+}
+
+// Body Response
+{ 
+    "status": 'success', 
+    "data":{
+        "disease_id":int,
+        "disease_name":"string",
+        "description":"string",
+        "affected_fish":"string"
+    } 
+}
+```
+
+- GET /scan-history<br/>
+Get user's scan history
+```
+// Headers
+{
+    "Authorization: Bearer {token}"
+}
+
+// Body Response
+{ 
+    "status": 'success', 
+    "total_scans": int
+    "data":[
+        {
+            "id_entry": "string",
+            "img_url": "string",
+            "disease_name": "string",
+            "confidence_score": float,
+            "created_at": "timestamp",
+            "request_completed": "timestamp"
+        }
+    ]
+}
+```
+
+- GET /scan-history/{id_entry}<br/>
+Get user's scan history
+```
+// Headers
+{
+    "Authorization: Bearer {token}"
+}
+
+// Body Response
+{ 
+    "status": 'success', 
+    "total_scans": int
+    "data":{
+        "id_entry": "string",
+        "img_url": "string",
+        "disease_name": "string",
+        "confidence_score": float,
+        "created_at": "timestamp",
+        "request_completed": "timestamp"
+    }
+}
+```
+
+- DELETE /scan-history/{id_entry}<br/>
+Deletes a scan entry
+```
+// Headers
+{
+    "Authorization: Bearer {token}"
+}
+
+// Body Response
+{ 
+    "status": 'success',
+    "message": 'Scan entry deleted successfully',
+    "deleted_entry_id": id_entry
+}
+```
+
+- GET /service/classes<br/>
+Get disease classes from model API
+```
+// Headers
+{
+    "Authorization: Bearer {token}"
+}
+
+// Body Response
+[
+    "classes"
+]
+```
+
+- POST /service/predict<br/>
+Predict disease from uploaded image
+```
+// Headers
+{
+    "Authorization: Bearer {token}"
+}
+
+// Form Data
+{
+    "file": image
+}
+
+// Body Response
+{
+    "entryId": "string",
+    "imageUrl": "string",
+    "diseaseName": "string",
+    "confidence": float
+}
