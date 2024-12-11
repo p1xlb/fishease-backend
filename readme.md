@@ -23,3 +23,35 @@
 - Inert
 - Vision
 - Google Cloud Storage
+
+## How to use
+1. Install dependencies
+```
+npm install
+```
+2. Setup environment (.env)
+```
+PORT=3000
+HOST=0.0.0.0
+JWT_SECRET=
+
+DB_HOST=
+DB_USER=
+DB_PASSWORD=
+DB_NAME=
+
+GOOGLE_USER=
+GOOGLE_PASS=
+
+GOOGLE_CLOUD_KEY_PATH=
+GOOGLE_CLOUD_PROJECT_ID=
+
+GOOGLE_CLOUD_BUCKET_NAME=
+
+FRONTEND_URL=
+ML_API_URL=
+```
+3. Run application
+```
+npm run start
+```
