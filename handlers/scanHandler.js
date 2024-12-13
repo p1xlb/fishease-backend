@@ -107,6 +107,19 @@ const scanHandler = {
 
       const { class_name: diseaseName, confidence } = predictionResponse.data;
 
+      // Check if the prediction is NOT a fish
+      if (diseaseName === 'Not Fish') {
+        // Optional: Clean up temporary file
+        fs.unlinkSync(file.path);
+
+        // Return warning response without saving to database or storage
+        return h.response({
+            message: 'Warning: Image does not contain a fish',
+            diseaseName,
+            confidence
+        }).code(400);
+    }
+
       // Insert entry into history
       const [result] = await transaction.execute(
         `INSERT INTO entry_history 
